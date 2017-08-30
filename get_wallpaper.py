@@ -4,6 +4,12 @@
 import re,sys,os,time,logging
 
 import urllib.request
+
+"""
+by ds17
+Github: https://github.com/ds17/
+E-mail: ingsed@outlook.com
+"""
 log_dir='D:\\WallPaper\\BingWallpaper\\3.5bing.log'
 logging.basicConfig(filename=log_dir,level=logging.INFO)
 
