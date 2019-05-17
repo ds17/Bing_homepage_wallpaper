@@ -1,7 +1,7 @@
 #D:\Python\Python35\python
 # -*- coding:utf-8 -*-
 
-import re,sys,os,time,logging
+import re,sys,os,time,logging,json
 
 import urllib.request
 
@@ -36,22 +36,30 @@ e_name_l=set(e_name_l)		#将e_name_l从list转换为set，删除log中重复的�
 # print('e_name_l SET:',e_name_l)
 
 def get_bing_backpic():
-	i=8
-	url= 'http://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n='+ str(i)
+	n=8
+	url= 'http://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n='+ str(n)
 	html=urllib.request.urlopen(url).read()
 	if html=='null':
 		print('获取页面错误')
 		sys.exit(-1)
-	html=html.decode('utf-8')
-	reg=re.compile('"url":"(.*?)","urlbase"',re.S)
-	text = re.findall(reg,html)
+	html = bytes.decode(html, encoding = 'utf-8')
+	# reg=re.compile('"url":"(.*?)","urlbase"',re.S)
+	# text = re.findall(reg,html)
 	# logging.warning([pic_url for pic_url in text])
 	text_no=0
+	content = json.loads(html)
 	
-	for imgurl in text :
-		imgurl='http://cn.bing.com'+imgurl
-		right = imgurl.rindex('/')
-		name = imgurl.replace(imgurl[:right+1],'')
+	# for imgurl in text :
+	for i in range(n):
+		urlend = content['images'][i]['url']
+		imgurl='http://cn.bing.com'+ urlend
+		name_start = int(re.search('id=OHR.',urlend).span()[1])
+		name_end = int(re.search('.jpg',urlend).span()[1])
+		name = urlend[name_start: name_end]
+
+
+		# right = imgurl.rindex('/')
+		# name = imgurl.replace(imgurl[:right+1],'')
 		if name in e_name_t:
 			logging.info('已存在：' + name)
 			print ('已存在：' + name)
@@ -66,7 +74,7 @@ def get_bing_backpic():
 			print ('保存成功：'+ save_name)
 		text_no=text_no+1
 
-		if text_no==len(text):
+		if text_no==n:
 			sleep_time=6
 			print('\n'+now_time+':爬取结束。\n'+'壁纸保存路径：'+file_dir+'\n'+str(sleep_time)+'秒后跳出')
 			logging.info('爬取时间：'+now_time+'\n\n')
